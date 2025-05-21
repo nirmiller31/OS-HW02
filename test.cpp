@@ -169,7 +169,11 @@ void recursive_fork(std::array<int, 5> grand_parent_array, bool print_enable, in
 
          pid_t pid = fork();
 
-         if(pid == 0) {                      // Child process, verify the clearance field is as written
+         if(pid < 0) {
+                  if(print_enable) std::cout << "Unexpected ERROR, verify_wide_fork_setter_getter_test failed" << std::endl;
+                  _exit(1);                  // Fork failed
+         }
+         else if(pid == 0) {                      // Child process, verify the clearance field is as written
 
                   child_result_array[0] = syscall(SECOND_FUNC_GET_SEC, LETTER_S_SWORD);
                   child_result_array[1] = syscall(SECOND_FUNC_GET_SEC, LETTER_M_MIDNIGHT);
@@ -179,24 +183,18 @@ void recursive_fork(std::array<int, 5> grand_parent_array, bool print_enable, in
                   if(print_enable) std::cout << "I got " << child_result_array << " for the verify_wide_fork_setter_getter_test" << std::endl;
                   if(child_result_array != grand_parent_array) _exit(1);           // FAIL
                   if(current_deep < SHORT_TEST_ITERATIONS){                        // Move on deeper
-                           recursive_fork(grand_parent_array, print_enable, ++current_deep);   
+                           recursive_fork(grand_parent_array, print_enable, current_deep + 1);   
                   }
-                  else {
-                            _exit(0);                                             // SUCCESS
-                  }
-                  
+                   _exit(0);                                                     // SUCCESS   
          }
-         if(pid > 0) {                       // Parent process, just wait the child
+         else if(pid > 0) {                       // Parent process, just wait the child
                   int status;
                   waitpid(pid, &status, 0);
                   if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {_exit(1); }
                   if(print_enable) std::cout << "Just Verified pid " << pid << "'s clearance field" << std::endl;
                   _exit(0);
          }
-         if(pid < 0) {
-                  if(print_enable) std::cout << "Unexpected ERROR, verify_wide_fork_setter_getter_test failed" << std::endl;
-                  _exit(1);                  // Fork failed
-         }
+
 }
 
 
@@ -205,10 +203,8 @@ bool verify_deep_fork_setter_getter_test() {
          for(int i=0 ; i<SHORT_TEST_ITERATIONS ; i++) {
 
                   bool print_enable = true;
-                  int current_deep = 0;
 
-                  std::array<int, 5> array = generate_5_array();;
-                  std::array<int, 5> result_array;
+                  std::array<int, 5> array = generate_5_array();
                   std::array<int, 5> child_result_array;
 
                   if(print_enable) std::cout << "----------------------------------------------------------------------" << std::endl;
@@ -218,21 +214,14 @@ bool verify_deep_fork_setter_getter_test() {
                   if(print_enable) std::cout << "SysCall  SET_SEC returned: " << returned << std::endl;
 
                   if(returned < 0) return 0;
-
-                  result_array[0] = syscall(SECOND_FUNC_GET_SEC, LETTER_S_SWORD);
-                  result_array[1] = syscall(SECOND_FUNC_GET_SEC, LETTER_M_MIDNIGHT);
-                  result_array[2] = syscall(SECOND_FUNC_GET_SEC, LETTER_C_CLAMP);
-                  result_array[3] = syscall(SECOND_FUNC_GET_SEC, LETTER_D_DUTY);
-                  result_array[4] = syscall(SECOND_FUNC_GET_SEC, LETTER_I_ISOLATE);
-
-                  if(print_enable) std::cout << "I got " << result_array << " for the verify_deep_fork_setter_getter_test" << std::endl;
-
-                  if(result_array != array) return 0;
                            
                   pid_t pid = fork();                 // Fork to verify we inherit the clearance field
-                //   current_deep++;
 
-                  if(pid == 0) {                      // Child process, verify the clearance field is as written
+                  if(pid < 0) {
+                           if(print_enable) std::cout << "Unexpected ERROR, verify_deep_fork_setter_getter_test failed" << std::endl;
+                           return 0;                  // Fork failed
+                  }
+                  else if(pid == 0) {                      // Child process, verify the clearance field is as written
                            child_result_array[0] = syscall(SECOND_FUNC_GET_SEC, LETTER_S_SWORD);
                            child_result_array[1] = syscall(SECOND_FUNC_GET_SEC, LETTER_M_MIDNIGHT);
                            child_result_array[2] = syscall(SECOND_FUNC_GET_SEC, LETTER_C_CLAMP);
@@ -241,20 +230,14 @@ bool verify_deep_fork_setter_getter_test() {
                            if(print_enable) std::cout << "I got " << child_result_array << " for the verify_deep_fork_setter_getter_test" << std::endl;
                            if(child_result_array != array) _exit(1);             // FAIL
                            
-                           if(current_deep < SHORT_TEST_ITERATIONS){             // Move on deeper
-                                    recursive_fork(array, print_enable, current_deep++);   
-                           }
+                           recursive_fork(array, print_enable, 1);               // Move on deeper
                            _exit(0);                                             // SUCCESS
                   }
-                  if(pid > 0) {                       // Parent process, just wait the child
+                  else if(pid > 0) {                       // Parent process, just wait the child
                            int status;
                            waitpid(pid, &status, 0);
                            if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {return 0; }
                            if(print_enable) std::cout << "Just Verified " << pid << " 's clearance field" << std::endl;
-                  }
-                  if(pid < 0) {
-                           if(print_enable) std::cout << "Unexpected ERROR, verify_deep_fork_setter_getter_test failed" << std::endl;
-                           return 0;                  // Fork failed
                   }
                   
 
