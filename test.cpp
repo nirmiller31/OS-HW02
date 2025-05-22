@@ -324,7 +324,7 @@ bool verify_first_function_error_test() {
 
          for(int i=0 ; i<SHORT_TEST_ITERATIONS ; i++) {
 
-                  bool print_enable = true;
+                  bool print_enable = false;
 
                   std::array<int, 5> array = generate_neagtive_positive_5_array();
 
@@ -369,6 +369,36 @@ bool verify_first_function_error_test() {
 }
 
 
+bool verify_second_function_error_test() {
+
+         if (seteuid(0) == -1) {                                                                                                                // Verify we run with root previllages
+                  std::cout << "Error test failed, Please run command with sudo: ./test" << std::endl;
+                  return 0;
+         }
+
+         for(int i=0 ; i<SHORT_TEST_ITERATIONS ; i++) {
+
+                  bool print_enable = false;
+
+                  std::array<int, 5> array = generate_neagtive_positive_5_array();
+
+                  if(print_enable) std::cout << "----------------------------------------------------------------------" << std::endl;
+                  if(print_enable) std::cout << "Im setting " << array << " for the verify_second_function_error_test" << std::endl;
+
+                  long returned = syscall(SECOND_FUNC_GET_SEC, array[0], array[1], array[2], array[3], array[4]);                                // Trying to insert negative arguments
+                  if(print_enable) std::cout << "SysCall GET_SEC returned: " << returned << std::endl;
+
+                  if(returned != -1) return 0;
+                  if(errno != EINVAL) return 0;
+                  if(print_enable) std::cout << "Just verified case of negative values to GET_SEC, got expected result" << returned << std::endl;
+
+                  if(print_enable) std::cout << "verify_second_function_error_test Passed for the " << i+1 << "time" << std::endl;
+                  if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;
+         }
+         return 1;
+}
+
+
 int main() {
 
          srand(static_cast<unsigned int>(time(0))); // Seed for randomization
@@ -379,6 +409,7 @@ int main() {
          run_test("Wide Fork Setter Getter test", verify_wide_fork_setter_getter_test);
          run_test("Deep Fork Setter Getter test", verify_deep_fork_setter_getter_test);
          run_test("First function error test", verify_first_function_error_test);
+         run_test("Second function error test", verify_second_function_error_test);
 
          std::cout << "\nTest Summary:\n";                                                         // Summary
          if (failed_tests.empty()) {
