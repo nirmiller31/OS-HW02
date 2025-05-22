@@ -27,14 +27,6 @@
 #define MEDIUM_TEST_ITERATIONS      70
 #define LONG_TEST_ITERATIONS        120
 
-    std::array<char, 5> letters_decode = {
-        LETTER_S_SWORD,
-        LETTER_M_MIDNIGHT,
-        LETTER_C_CLAMP,
-        LETTER_D_DUTY,
-        LETTER_I_ISOLATE
-    };
-
     template<typename T, std::size_t N>
     std::ostream& operator<<(std::ostream& os, const std::array<T, N>& arr) {
             os << "[";
@@ -640,6 +632,14 @@
 
             if(print_enable) std::cout << "----------------------------------------------------------------------" << std::endl;
 
+            std::array<char, 5> letters_decode = {
+                    LETTER_S_SWORD,
+                    LETTER_M_MIDNIGHT,
+                    LETTER_C_CLAMP,
+                    LETTER_D_DUTY,
+                    LETTER_I_ISOLATE
+                };
+
             // Try to insert wrong clearances, expect -1 and errno == EINVAL
             std::array<char, 21> letters = {
                     'a', 'b', 'e', 'f', 'g', 'h',
@@ -664,32 +664,33 @@
                 pid = pid_t(rand() % 3000);         // look for non-exsisting pid
             }
             returned = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_S_SWORD);
-            if((returned != -1) || (errno != -ESRCH)) return false;
+            if((returned != -1) || (errno != ESRCH)) return false;
             returned = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_M_MIDNIGHT);
-            if((returned != -1) || (errno != -ESRCH)) return false;
+            if((returned != -1) || (errno != ESRCH)) return false;
             returned = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_D_DUTY);
-            if((returned != -1) || (errno != -ESRCH)) return false;
+            if((returned != -1) || (errno != ESRCH)) return false;
             returned = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_C_CLAMP);
-            if((returned != -1) || (errno != -ESRCH)) return false;
+            if((returned != -1) || (errno != ESRCH)) return false;
             returned = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_I_ISOLATE);
-            if((returned != -1) || (errno != -ESRCH)) return false;
+            if((returned != -1) || (errno != ESRCH)) return false;
 
             // Try to call a process without the correct clearance
             std::array<int, 5> array = generate_5_array();
+            int flipper_bit = rand() % 5;
+            array[flipper_bit] = 0;     // to be flipped
             if(print_enable) std::cout << "Im setting " << array << " for the verify_first_function_error_test" << std::endl;
             returned = syscall(FIRST_FUNC_SET_SEC, array[0], array[1], array[2], array[3], array[4]);
             if(print_enable) std::cout << "SysCall SET_SEC returned: " << returned << std::endl;
 
             std::array<int, 5> new_array = array;
-            int flipper_bit = rand() % 5;
-            new_array[flipper_bit] ^= 1;        // flip the bit
+            new_array[flipper_bit] = 1;        // flip the bit
 
-            char flipped_letter = letters_decode[flipper_bit - 1];
+            char flipped_letter = letters_decode[flipper_bit];
 
             int pipefd[2];
             if(pipe(pipefd) == -1) {return false;}
 
-            pid_t pid = fork();                 // Fork to verify we inherit the clearance field
+            pid = fork();                       // Fork to verify we inherit the clearance field
 
             if(pid == 0) {                      // Child process, should inherit the clearance field
                 close(pipefd[0]); // pipe_shit
@@ -709,8 +710,11 @@
                 close(pipefd[0]);
 
                 // Get the clearance using the pid and third sys_call, one of them has to fail
+                if(print_enable) std::cout << "Im setting " << flipped_letter << " letter to the child in verify_dynamic_fork_check_sec_test" << std::endl;
                 returned = syscall(THIRD_FUNC_CHECK_SEC, pid, flipped_letter);
-                if((returned != -1) || (errno != -EPERM)) return false;
+                if(print_enable) std::cout << "SysCall CHECK_SEC returned: " << returned << std::endl;
+                if(print_enable) std::cout << "errno: " << errno << std::endl;
+                if((returned != -1) || (errno != EPERM)) return false;
 
                 kill(pid, SIGKILL);        // Kill child
                 waitpid(pid, nullptr, 0);  // Reap zombie
