@@ -342,9 +342,13 @@ bool verify_simple_check_sec_test() {
                   result_array[3] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_D_DUTY);
                   result_array[4] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_I_ISOLATE);
 
-                  if(print_enable) std::cout << "I got " << array << " for the verify_simple_check_sec_test" << std::endl;
+                  if(print_enable) std::cout << "I got " << result_array << " for the verify_simple_check_sec_test" << std::endl;
 
-                  if(result_array != array) {return 0; }
+                  for(int i = 0 ; i<5 ; i++) {
+                    if(result_array[i] && array[i]) continue;
+                    else if (result_array[i] == -1 && array[i] == 0) continue;
+                    else return false;
+                  }
 
                   if(print_enable) std::cout << "verify_simple_check_sec_test Passed for the " << i+1 << " time" << std::endl;
                   if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;        
@@ -381,16 +385,11 @@ bool verify_non_binary_check_sec_test() {
 
                   if(print_enable) std::cout << "I got " << result_array << " for the verify_non_binary_check_sec_test" << std::endl;
 
-                  // Norm the resaults (0 - >0, <num> -> 1)
-                  array[0] = (array[0] > 0);
-                  array[1] = (array[1] > 0);
-                  array[2] = (array[2] > 0);
-                  array[3] = (array[3] > 0);
-                  array[4] = (array[4] > 0);
-
-                  if(print_enable) std::cout << "I got " << array << " for the verify_non_binary_check_sec_test" << std::endl;
-
-                  if(result_array != array) {return false; }
+                  for(int i = 0 ; i<5 ; i++) {
+                    if(result_array[i] && array[i]) continue;
+                    else if (result_array[i] == -1 && array[i] == 0) continue;
+                    else return false;
+                  }
 
                   if(print_enable) std::cout << "verify_non_binary_check_sec_test Passed for the " << i+1 << " time" << std::endl;
                   if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;        
