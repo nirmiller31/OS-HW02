@@ -160,11 +160,11 @@ bool verify_non_binary_setter_getter_test() {
 
                   if(print_enable) std::cout << "I got " << result_array << " for the verify_non_binary_setter_getter_test" << std::endl;
 
-                  result_array[0] = (result_array[0] > 0);
-                  result_array[1] = (result_array[1] > 0);
-                  result_array[2] = (result_array[2] > 0);
-                  result_array[3] = (result_array[3] > 0);
-                  result_array[4] = (result_array[4] > 0);
+                  array[0] = (array[0] > 0);
+                  array[1] = (array[1] > 0);
+                  array[2] = (array[2] > 0);
+                  array[3] = (array[3] > 0);
+                  array[4] = (array[4] > 0);
 
                   if(print_enable) std::cout << "I got " << array << " for the verify_non_binary_setter_getter_test" << std::endl;
 
@@ -324,7 +324,7 @@ bool verify_first_function_error_test() {
 
          for(int i=0 ; i<SHORT_TEST_ITERATIONS ; i++) {
 
-                  bool print_enable = false;
+                  bool print_enable = true;
 
                   std::array<int, 5> array = generate_neagtive_positive_5_array();
 
@@ -336,7 +336,7 @@ bool verify_first_function_error_test() {
 
                   if(returned != -1) return 0;
                   if(errno != EINVAL) return 0;
-                  if(print_enable) std::cout << "Just verified case of negative values to SET_SEC, got expected result" << returned << std::endl;
+                  if(print_enable) std::cout << "Just verified case of negative values to SET_SEC, got expected result: " << returned << std::endl;
 
                   array = generate_5_array();                                                                                                   // generate valid array
                   if(print_enable) std::cout << "Im setting " << array << " for the verify_first_function_error_test" << std::endl;
@@ -353,7 +353,7 @@ bool verify_first_function_error_test() {
                   if(print_enable) std::cout << "Im setting " << array << " for the verify_first_function_error_test with no root privillages" << std::endl;
                   if(returned != -1) return 0;
                   if(errno != EINVAL) return 0;
-                  if(print_enable) std::cout << "Just verified case of negative values with no root prev. to SET_SEC, got expected result" << returned << std::endl;
+                  if(print_enable) std::cout << "Just verified case of negative values with no root prev. to SET_SEC, got expected result: " << returned << std::endl;
 
                   if (seteuid(0) == -1) {return 0;}                                                                                             // Set root previllages back
                   array = generate_5_array();                                                                                                   // generate valid array
