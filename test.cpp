@@ -131,7 +131,7 @@ bool verify_simple_setter_getter_test() {
                   if(print_enable) std::cout << "verify_simple_setter_getter_test Passed for the " << i+1 << " time" << std::endl;
                   if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;        
          }
-         return 1;
+         return true;
 }
 
 bool verify_non_binary_setter_getter_test() {
@@ -175,7 +175,7 @@ bool verify_non_binary_setter_getter_test() {
                   if(print_enable) std::cout << "verify_non_binary_setter_getter_test Passed for the " << i+1 << " time" << std::endl;
                   if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;        
          }
-         return 1;
+         return true;
 }
 
 bool verify_wide_fork_setter_getter_test() {
@@ -315,6 +315,89 @@ bool verify_deep_fork_setter_getter_test() {
          return true;
 }
 
+bool verify_simple_check_sec_test() {
+
+         for(int i=0 ; i<MEDIUM_TEST_ITERATIONS ; i++) {
+
+                  bool print_enable = false;
+
+                  std::array<int, 5> array = generate_5_array();;
+                  std::array<int, 5> result_array;
+
+                  if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;
+                  if(print_enable) std::cout << "Im setting " << array << " for the verify_simple_check_sec_test" << std::endl;
+                  
+                  // Set the clearance according to the array
+                  long returned = syscall(FIRST_FUNC_SET_SEC, array[0], array[1], array[2], array[3], array[4]);
+                  if(print_enable) std::cout << "SysCall SET_SEC returned: " << returned << " 0 is GOOD!" << std::endl;
+
+                  if(returned < 0) {return 0; }
+
+                  pid_t pid = getpid();
+
+                  // Get the clearance using check_sec system call to its pid
+                  result_array[0] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_S_SWORD);
+                  result_array[1] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_M_MIDNIGHT);
+                  result_array[2] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_C_CLAMP);
+                  result_array[3] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_D_DUTY);
+                  result_array[4] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_I_ISOLATE);
+
+                  if(print_enable) std::cout << "I got " << array << " for the verify_simple_check_sec_test" << std::endl;
+
+                  if(result_array != array) {return 0; }
+
+                  if(print_enable) std::cout << "verify_simple_check_sec_test Passed for the " << i+1 << " time" << std::endl;
+                  if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;        
+         }
+         return true;
+}
+
+bool verify_non_binary_check_sec_test() {
+
+         for(int i=0 ; i<MEDIUM_TEST_ITERATIONS ; i++) {
+
+                  bool print_enable = false;
+
+                  std::array<int, 5> array = generate_non_binary_5_array();;
+                  std::array<int, 5> result_array;
+
+                  if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;
+                  if(print_enable) std::cout << "Im setting " << array << " for the verify_non_binary_check_sec_test" << std::endl;
+                  
+                  // Set the clearance according to the array
+                  long returned = syscall(FIRST_FUNC_SET_SEC, array[0], array[1], array[2], array[3], array[4]);
+                  if(print_enable) std::cout << "SysCall SET_SEC returned: " << returned << " 0 is GOOD!" << std::endl;
+
+                  if(returned < 0) {return false; }
+
+                  pid_t pid = getpid();
+
+                  // Get the clearance using check_sec system call to its pid
+                  result_array[0] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_S_SWORD);
+                  result_array[1] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_M_MIDNIGHT);
+                  result_array[2] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_C_CLAMP);
+                  result_array[3] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_D_DUTY);
+                  result_array[4] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_I_ISOLATE);
+
+                  if(print_enable) std::cout << "I got " << result_array << " for the verify_non_binary_check_sec_test" << std::endl;
+
+                  // Norm the resaults (0 - >0, <num> -> 1)
+                  array[0] = (array[0] > 0);
+                  array[1] = (array[1] > 0);
+                  array[2] = (array[2] > 0);
+                  array[3] = (array[3] > 0);
+                  array[4] = (array[4] > 0);
+
+                  if(print_enable) std::cout << "I got " << array << " for the verify_non_binary_check_sec_test" << std::endl;
+
+                  if(result_array != array) {return false; }
+
+                  if(print_enable) std::cout << "verify_non_binary_check_sec_test Passed for the " << i+1 << " time" << std::endl;
+                  if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;        
+         }
+         return true;
+}
+
 bool verify_first_function_error_test() {
 
          if (seteuid(0) == -1) {                                                                                                                // Verify we run with root previllages
@@ -414,6 +497,9 @@ int main() {
          run_test("Deep Fork Setter Getter test", verify_deep_fork_setter_getter_test);
          run_test("First function error test", verify_first_function_error_test);
          run_test("Second function error test", verify_second_function_error_test);
+         run_test("Simple check_sec test", verify_simple_check_sec_test);
+         run_test("Non binary check_sec test", verify_non_binary_check_sec_test);
+         
 
          std::cout << "\nTest Summary:\n";                                                         // Summary
          if (failed_tests.empty()) {
