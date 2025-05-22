@@ -405,7 +405,6 @@ bool verify_simple_fork_check_sec_test() {
 
                   bool print_enable = false;
 
-                  std::array<int, 5> array = generate_5_array();
                   std::array<int, 5> result_array;
                   std::array<int, 5> child_result_array;
 
@@ -413,6 +412,7 @@ bool verify_simple_fork_check_sec_test() {
 
                   for(int j=0 ; j<MEDIUM_TEST_ITERATIONS ; j++){
 
+                           std::array<int, 5> array = generate_5_array();
                            if(print_enable) std::cout << "Im setting " << array << " for the verify_wide_fork_setter_getter_test" << std::endl;
                            long returned = syscall(FIRST_FUNC_SET_SEC, array[0], array[1], array[2], array[3], array[4]);
                            if(print_enable) std::cout << "SysCall SET_SEC returned: " << returned << std::endl;
