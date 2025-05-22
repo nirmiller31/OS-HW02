@@ -3,6 +3,7 @@
 #include <iostream>
 #include <unistd.h>
 #include <cassert>
+#include <errno.h>
 #include <random>
 #include <array>
 #include <thread>
@@ -53,6 +54,19 @@ std::array<int, 5> generate_non_binary_5_array() {                              
          for (int& num : result) {
              num = rand() / 7;
              if(num % 3 == 0) {num=0;}
+         }
+         return result;
+}
+
+std::array<int, 5> generate_neagtive_positive_5_array() {                                          // Generate array with no limits
+
+         std::array<int, 5> result;
+         int negative_index = rand() % 5;
+
+         for(int i=0 ; i<5 ; i++){
+                  result[i] = rand() / 7;
+                  if(result[i] % 3 == 0) {result[i]=0;}
+                  if(result[i] % 5 == 0 || i == negative_index) {result[i]*=(-1);}
          }
          return result;
 }
@@ -263,7 +277,7 @@ bool verify_deep_fork_setter_getter_test() {
                   if(print_enable) std::cout << "Im setting " << array << " for the verify_deep_fork_setter_getter_test" << std::endl;
                   
                   long returned = syscall(FIRST_FUNC_SET_SEC, array[0], array[1], array[2], array[3], array[4]);
-                  if(print_enable) std::cout << "SysCall  SET_SEC returned: " << returned << std::endl;
+                  if(print_enable) std::cout << "SysCall SET_SEC returned: " << returned << std::endl;
 
                   if(returned < 0) return 0;
                            
@@ -300,6 +314,33 @@ bool verify_deep_fork_setter_getter_test() {
          return 1;
 }
 
+bool verify_first_function_error_test() {
+
+         for(int i=0 ; i<SHORT_TEST_ITERATIONS ; i++) {
+
+                  bool print_enable = true;
+
+                  std::array<int, 5> array = generate_neagtive_positive_5_array();
+
+                  if(print_enable) std::cout << "----------------------------------------------------------------------" << std::endl;
+                  if(print_enable) std::cout << "Im setting " << array << " for the verify_first_function_error_test" << std::endl;
+
+                  long returned = syscall(FIRST_FUNC_SET_SEC, array[0], array[1], array[2], array[3], array[4]);                                // Trying to insert negative arguments
+                  if(print_enable) std::cout << "SysCall SET_SEC returned: " << returned << std::endl;
+
+                  if(returned != -1) return 0;
+                  if(errno != EINVAL) return 0;
+                  if(print_enable) std::cout << "Just verified case of negative values to SET_SEC, got expected result" << returned << std::endl;
+
+                  array = generate_5_array();                                                                                                   // generate valid array
+                  if(print_enable) std::cout << "Im setting " << array << " for the verify_first_function_error_test" << std::endl;
+
+                  if(print_enable) std::cout << "effective uid " << geteuid() << std::endl;
+                  if(print_enable) std::cout << "uid " << getuid() << std::endl;
+         }
+         return 1;
+}
+
 
 int main() {
 
@@ -310,7 +351,7 @@ int main() {
          run_test("Non Binary Setter Getter test", verify_non_binary_setter_getter_test);
          run_test("Wide Fork Setter Getter test", verify_wide_fork_setter_getter_test);
          run_test("Deep Fork Setter Getter test", verify_deep_fork_setter_getter_test);
-         run_test("Deep Fork Setter Getter test", verify_deep_fork_setter_getter_test);
+         run_test("First function error test", verify_first_function_error_test);
 
          std::cout << "\nTest Summary:\n";                                                         // Summary
          if (failed_tests.empty()) {
