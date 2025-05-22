@@ -747,7 +747,7 @@
 
             run_test("First function error handling test", verify_first_function_error_handling_test);
             run_test("Second function error handling test", verify_second_function_error_handling_test);
-            run_test("Second function error handling test", verify_third_function_error_handling_test);
+            run_test("Third function error handling test", verify_third_function_error_handling_test);
            
 
             std::cout << "\nTest Summary:\n";
