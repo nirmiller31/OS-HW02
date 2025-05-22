@@ -46,6 +46,16 @@ std::array<int, 5> generate_5_array() {                                         
          return result;
 }
 
+std::array<int, 5> generate_non_binary_5_array() {                                                            // Generate binary array
+
+         std::array<int, 5> result;
+
+         for (int& num : result) {
+             num = rand() % rand();
+         }
+         return result;
+}
+
 using TestFunc = bool(*)();                                                                        // Simple test type
 
 std::vector<std::string> failed_tests;                                                             // Stores failed test names
@@ -83,6 +93,39 @@ bool verify_simple_setter_getter_test() {
                   bool print_enable = false;
 
                   std::array<int, 5> array = generate_5_array();;
+                  std::array<int, 5> result_array;
+
+                  if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;
+                  if(print_enable) std::cout << "Im setting " << array << " for the verify_simple_setter_getter_test" << std::endl;
+                  
+                  long returned = syscall(FIRST_FUNC_SET_SEC, array[0], array[1], array[2], array[3], array[4]);
+                  if(print_enable) std::cout << "SysCall SET_SEC returned: " << returned << " 0 is GOOD!" << std::endl;
+
+                  if(returned < 0) {return 0; }
+
+                  result_array[0] = syscall(SECOND_FUNC_GET_SEC, LETTER_S_SWORD);
+                  result_array[1] = syscall(SECOND_FUNC_GET_SEC, LETTER_M_MIDNIGHT);
+                  result_array[2] = syscall(SECOND_FUNC_GET_SEC, LETTER_C_CLAMP);
+                  result_array[3] = syscall(SECOND_FUNC_GET_SEC, LETTER_D_DUTY);
+                  result_array[4] = syscall(SECOND_FUNC_GET_SEC, LETTER_I_ISOLATE);
+
+                  if(print_enable) std::cout << "I got " << array << " for the verify_simple_setter_getter_test" << std::endl;
+
+                  if(result_array != array) {return 0; }
+
+                  if(print_enable) std::cout << "verify_simple_setter_getter_test Passed for the " << i << " time" << std::endl;
+                  if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;        
+         }
+         return 1;
+}
+
+bool binary_setter_getter_test() {
+
+         for(int i=0 ; i<MEDIUM_TEST_ITERATIONS ; i++) {
+
+                  bool print_enable = true;
+
+                  std::array<int, 5> array = generate_non_binary_5_array();;
                   std::array<int, 5> result_array;
 
                   if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;
@@ -255,7 +298,9 @@ int main() {
 
          run_test("Default clearance is zero", verify_default_is_zero_test);
          run_test("Simple Setter Getter test", verify_simple_setter_getter_test);
+         run_test("Non-Binary Setter Getter test", verify_non-binary_setter_getter_test);
          run_test("Wide Fork Setter Getter test", verify_wide_fork_setter_getter_test);
+         run_test("Deep Fork Setter Getter test", verify_deep_fork_setter_getter_test);
          run_test("Deep Fork Setter Getter test", verify_deep_fork_setter_getter_test);
 
          std::cout << "\nTest Summary:\n";                                                         // Summary
