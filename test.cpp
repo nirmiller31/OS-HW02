@@ -8,6 +8,7 @@
 #include <array>
 #include <thread>
 #include <chrono>
+#include <signal.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 
@@ -397,6 +398,66 @@ bool verify_non_binary_check_sec_test() {
          return true;
 }
 
+
+bool verify_simple_fork_check_sec_test() {
+
+         for(int i=0 ; i<SHORT_TEST_ITERATIONS ; i++) {
+
+                  bool print_enable = false;
+
+                  std::array<int, 5> array = generate_5_array();
+                  std::array<int, 5> result_array;
+                  std::array<int, 5> child_result_array;
+
+                  if(print_enable) std::cout << "----------------------------------------------------------------------" << std::endl;
+
+                  for(int j=0 ; j<MEDIUM_TEST_ITERATIONS ; j++){
+
+                           if(print_enable) std::cout << "Im setting " << array << " for the verify_wide_fork_setter_getter_test" << std::endl;
+                           long returned = syscall(FIRST_FUNC_SET_SEC, array[0], array[1], array[2], array[3], array[4]);
+                           if(print_enable) std::cout << "SysCall SET_SEC returned: " << returned << std::endl;
+                           if(returned < 0) return false;
+                           
+                           pid_t pid = fork();                 // Fork to verify we inherit the clearance field
+
+                           if(pid == 0) {                      // Child process, should inherit the clearance field
+                                    
+                                    pause();                   // Wait for the kill
+                           }
+                           if(pid > 0) {                       // Parent process
+
+                                    std::array<int, 5> array_of_ones = {1,1,1,1,1};
+                                    returned = syscall(FIRST_FUNC_SET_SEC, array_of_ones[0], array_of_ones[1], array_of_ones[2], array_of_ones[3], array_of_ones[4]);               // Let the caller have all the clerances, error handling checked seperatly
+                                    if(print_enable) std::cout << "SysCall SET_SEC returned: " << returned << std::endl;
+
+                                    if(returned < 0) return false;
+                                    // Get the clearance using the pid and third sys_call
+                                    child_result_array[0] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_S_SWORD);
+                                    child_result_array[1] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_M_MIDNIGHT);
+                                    child_result_array[2] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_C_CLAMP);
+                                    child_result_array[3] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_D_DUTY);
+                                    child_result_array[4] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_I_ISOLATE);
+
+                                    kill(pid, SIGKILL);        // Kill child
+                                    waitpid(pid, nullptr, 0);  // Reap zombie
+
+                                    if(print_enable) std::cout << "I got " << child_result_array << " for the verify_wide_fork_setter_getter_test" << std::endl;
+                                    if(child_result_array != array) {return false;}
+                                    if(print_enable) std::cout << "Just Verified " << pid << " 's clearance field" << std::endl;
+                           }
+                           if(pid < 0) {
+                                    if(print_enable) std::cout << "Unexpected ERROR, verify_wide_fork_setter_getter_test failed" << std::endl;
+                                    return false;              // Fork failed
+                           }
+                  }
+
+                  if(print_enable) std::cout << "verify_wide_fork_setter_getter_test Passed for the " << i+1 << " time" << std::endl;
+                  if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;
+                  
+         }
+         return true;
+}
+
 bool verify_first_function_error_test() {
 
          if (seteuid(0) == -1) {                                                                                                                // Verify we run with root previllages
@@ -494,10 +555,13 @@ int main() {
          run_test("Non Binary Setter Getter test", verify_non_binary_setter_getter_test);
          run_test("Wide Fork Setter Getter test", verify_wide_fork_setter_getter_test);
          run_test("Deep Fork Setter Getter test", verify_deep_fork_setter_getter_test);
-         run_test("First function error test", verify_first_function_error_test);
-         run_test("Second function error test", verify_second_function_error_test);
          run_test("Simple check_sec test", verify_simple_check_sec_test);
          run_test("Non binary check_sec test", verify_non_binary_check_sec_test);
+         run_test("Simple fork check_sec test", verify_simple_fork_check_sec_test);
+
+         run_test("First function error test", verify_first_function_error_test);
+         run_test("Second function error test", verify_second_function_error_test);
+
          
 
          std::cout << "\nTest Summary:\n";                                                         // Summary
