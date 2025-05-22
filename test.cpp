@@ -38,11 +38,8 @@ std::ostream& operator<<(std::ostream& os, const std::array<T, N>& arr) {
 }
 
 std::array<int, 5> generate_5_array() {                                                            // Generate binary array
-
          std::array<int, 5> result;
-         for (int& num : result) {
-             num = rand() % 2;
-         }
+         for (int& num : result) {num = rand() % 2;}
          return result;
 }
 
@@ -60,7 +57,6 @@ std::array<int, 5> generate_neagtive_positive_5_array() {                       
 
          std::array<int, 5> result;
          int negative_index = rand() % 5;
-
          for(int i=0 ; i<5 ; i++){
                   result[i] = rand() / 7;
                   if(result[i] % 3 == 0 && i != negative_index) {result[i]=0;}
@@ -92,6 +88,8 @@ bool verify_default_is_zero_test() {
 
          std::array<int, 5> zero_array = {0,0,0,0,0};
          std::array<int, 5> result_array;
+
+         // Get the clearance using system call
          result_array[0] = syscall(SECOND_FUNC_GET_SEC, LETTER_S_SWORD);
          result_array[1] = syscall(SECOND_FUNC_GET_SEC, LETTER_M_MIDNIGHT);
          result_array[2] = syscall(SECOND_FUNC_GET_SEC, LETTER_C_CLAMP);
@@ -99,7 +97,6 @@ bool verify_default_is_zero_test() {
          result_array[4] = syscall(SECOND_FUNC_GET_SEC, LETTER_I_ISOLATE);
          if(print_enable) std::cout << "I got " << result_array << " for the verify_default_is_zero_test" << std::endl;
          return (result_array == zero_array);
-
 }
 
 bool verify_simple_setter_getter_test() {
@@ -114,11 +111,13 @@ bool verify_simple_setter_getter_test() {
                   if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;
                   if(print_enable) std::cout << "Im setting " << array << " for the verify_simple_setter_getter_test" << std::endl;
                   
+                  // Set the clearance according to the array
                   long returned = syscall(FIRST_FUNC_SET_SEC, array[0], array[1], array[2], array[3], array[4]);
                   if(print_enable) std::cout << "SysCall SET_SEC returned: " << returned << " 0 is GOOD!" << std::endl;
 
                   if(returned < 0) {return 0; }
 
+                  // Get the clearance using system call
                   result_array[0] = syscall(SECOND_FUNC_GET_SEC, LETTER_S_SWORD);
                   result_array[1] = syscall(SECOND_FUNC_GET_SEC, LETTER_M_MIDNIGHT);
                   result_array[2] = syscall(SECOND_FUNC_GET_SEC, LETTER_C_CLAMP);
@@ -147,11 +146,13 @@ bool verify_non_binary_setter_getter_test() {
                   if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;
                   if(print_enable) std::cout << "Im setting " << array << " for the verify_non_binary_setter_getter_test" << std::endl;
                   
+                  // Set the clearance according to the array
                   long returned = syscall(FIRST_FUNC_SET_SEC, array[0], array[1], array[2], array[3], array[4]);
                   if(print_enable) std::cout << "SysCall SET_SEC returned: " << returned << " 0 is GOOD!" << std::endl;
 
-                  if(returned < 0) {return 0; }
+                  if(returned < 0) {return false; }
 
+                  // Get the clearance using system call
                   result_array[0] = syscall(SECOND_FUNC_GET_SEC, LETTER_S_SWORD);
                   result_array[1] = syscall(SECOND_FUNC_GET_SEC, LETTER_M_MIDNIGHT);
                   result_array[2] = syscall(SECOND_FUNC_GET_SEC, LETTER_C_CLAMP);
@@ -160,6 +161,7 @@ bool verify_non_binary_setter_getter_test() {
 
                   if(print_enable) std::cout << "I got " << result_array << " for the verify_non_binary_setter_getter_test" << std::endl;
 
+                  // Norm the resaults (0 - >0, <num> -> 1)
                   array[0] = (array[0] > 0);
                   array[1] = (array[1] > 0);
                   array[2] = (array[2] > 0);
@@ -168,7 +170,7 @@ bool verify_non_binary_setter_getter_test() {
 
                   if(print_enable) std::cout << "I got " << array << " for the verify_non_binary_setter_getter_test" << std::endl;
 
-                  if(result_array != array) {return 0; }
+                  if(result_array != array) {return false; }
 
                   if(print_enable) std::cout << "verify_non_binary_setter_getter_test Passed for the " << i+1 << " time" << std::endl;
                   if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;        
@@ -192,7 +194,7 @@ bool verify_wide_fork_setter_getter_test() {
                   long returned = syscall(FIRST_FUNC_SET_SEC, array[0], array[1], array[2], array[3], array[4]);
                   if(print_enable) std::cout << "SysCall  SET_SEC returned: " << returned << std::endl;
 
-                  if(returned < 0) return 0;
+                  if(returned < 0) return false;
 
                   for(int j=0 ; j<MEDIUM_TEST_ITERATIONS ; j++){
                            
@@ -211,20 +213,20 @@ bool verify_wide_fork_setter_getter_test() {
                            if(pid > 0) {                       // Parent process, just wait the child
                                     int status;
                                     waitpid(pid, &status, 0);
-                                    if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {return 0; }
+                                    if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {return false; }
                                     if(print_enable) std::cout << "Just Verified " << pid << " 's clearance field" << std::endl;
                            }
                            if(pid < 0) {
                                     if(print_enable) std::cout << "Unexpected ERROR, verify_wide_fork_setter_getter_test failed" << std::endl;
-                                    return 0;                  // Fork failed
+                                    return false;                  // Fork failed
                            }
                   }
 
-                  if(print_enable) std::cout << "verify_wide_fork_setter_getter_test Passed for the " << i+1 << "time" << std::endl;
+                  if(print_enable) std::cout << "verify_wide_fork_setter_getter_test Passed for the " << i+1 << " time" << std::endl;
                   if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;
                   
          }
-         return 1;
+         return true;
 }
 
 
@@ -279,14 +281,13 @@ bool verify_deep_fork_setter_getter_test() {
                   
                   long returned = syscall(FIRST_FUNC_SET_SEC, array[0], array[1], array[2], array[3], array[4]);
                   if(print_enable) std::cout << "SysCall SET_SEC returned: " << returned << std::endl;
-
-                  if(returned < 0) return 0;
+                  if(returned < 0) return false;
                            
                   pid_t pid = fork();                 // Fork to verify we inherit the clearance field
 
                   if(pid < 0) {
                            if(print_enable) std::cout << "Unexpected ERROR, verify_deep_fork_setter_getter_test failed" << std::endl;
-                           return 0;                  // Fork failed
+                           return false;                  // Fork failed
                   }
                   else if(pid == 0) {                      // Child process, verify the clearance field is as written
                            child_result_array[0] = syscall(SECOND_FUNC_GET_SEC, LETTER_S_SWORD);
@@ -303,70 +304,67 @@ bool verify_deep_fork_setter_getter_test() {
                   else if(pid > 0) {                       // Parent process, just wait the child
                            int status;
                            waitpid(pid, &status, 0);
-                           if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {return 0; }
+                           if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {return false; }
                            if(print_enable) std::cout << "Just Verified " << pid << " 's clearance field" << std::endl;
                   }
                   
-
-                  if(print_enable) std::cout << "verify_deep_fork_setter_getter_test Passed for the " << i+1 << "time" << std::endl;
+                  if(print_enable) std::cout << "verify_deep_fork_setter_getter_test Passed for the " << i+1 << " time" << std::endl;
                   if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;
                   
          }
-         return 1;
+         return true;
 }
 
 bool verify_first_function_error_test() {
 
          if (seteuid(0) == -1) {                                                                                                                // Verify we run with root previllages
                   std::cout << "Error test failed, Please run command with sudo: ./test" << std::endl;
-                  return 0;
+                  return false;
          }
 
          for(int i=0 ; i<SHORT_TEST_ITERATIONS ; i++) {
 
-                  bool print_enable = true;
-
-                  std::array<int, 5> array = generate_neagtive_positive_5_array();
-
+                  bool print_enable = false;
                   if(print_enable) std::cout << "----------------------------------------------------------------------" << std::endl;
+
+                  // Try to insert negative clearances, expect -1 and errno == EINVAL
+                  std::array<int, 5> array = generate_neagtive_positive_5_array();
                   if(print_enable) std::cout << "Im setting " << array << " for the verify_first_function_error_test" << std::endl;
-
-                  long returned = syscall(FIRST_FUNC_SET_SEC, array[0], array[1], array[2], array[3], array[4]);                                // Trying to insert negative arguments
+                  long returned = syscall(FIRST_FUNC_SET_SEC, array[0], array[1], array[2], array[3], array[4]);
                   if(print_enable) std::cout << "SysCall SET_SEC returned: " << returned << std::endl;
-
-                  if(returned != -1) return 0;
-                  if(errno != EINVAL) return 0;
+                  if((returned != -1) || (errno != EINVAL)) return false;
                   if(print_enable) std::cout << "Just verified case of negative values to SET_SEC, got expected result: " << returned << std::endl;
 
-                  array = generate_5_array();                                                                                                   // generate valid array
+                  // Try to insert normal clearances, without root privillage expect -1 and errno == EPERM
+                  array = generate_5_array();
                   if(print_enable) std::cout << "Im setting " << array << " for the verify_first_function_error_test" << std::endl;
-                  if (seteuid(1000) == -1) {return 0;}                                                                                          // Undo the root privillages
-                  if(print_enable) std::cout << "effective uid " << geteuid() << std::endl;
-
-                  returned = syscall(FIRST_FUNC_SET_SEC, array[0], array[1], array[2], array[3], array[4]);                                     // Trying to insert valid arguments
+                  if(seteuid(1000) == -1) {return false;}
+                  returned = syscall(FIRST_FUNC_SET_SEC, array[0], array[1], array[2], array[3], array[4]);
                   if(print_enable) std::cout << "SysCall SET_SEC returned: " << returned << std::endl;
-                  if(returned != -1) return 0;
-                  if(errno != EPERM) return 0;
+                  if(returned != -1) return false;
+                  if(errno != EPERM) return false;
                   if(print_enable) std::cout << "Just verified lack of root previllages to SET_SEC, got expected result" << returned << std::endl;
 
+                  // Try to insert negative clearances, without root privillage expect -1 and errno == EINVAL
                   array = generate_neagtive_positive_5_array();
                   if(print_enable) std::cout << "Im setting " << array << " for the verify_first_function_error_test with no root privillages" << std::endl;
                   returned = syscall(FIRST_FUNC_SET_SEC, array[0], array[1], array[2], array[3], array[4]);
-                  if(returned != -1) return 0;
-                  if(errno != EINVAL) return 0;
+                  if((returned != -1) || (errno != EINVAL)) return false;
                   if(print_enable) std::cout << "Just verified case of negative values with no root prev. to SET_SEC, got expected result: " << returned << std::endl;
 
-                  if (seteuid(0) == -1) {return 0;}                                                                                             // Set root previllages back
-                  array = generate_5_array();                                                                                                   // generate valid array
-                  if(print_enable) std::cout << "Im setting " << array << " for the verify_first_function_error_test" << std::endl;             // Undo the root privillages
+                  if (seteuid(0) == -1) {return false;}
+
+                  // Try to insert normal clearances, with root privillage expect 0 (Success)
+                  array = generate_5_array();
+                  if(print_enable) std::cout << "Im setting " << array << " for the verify_first_function_error_test" << std::endl;
                   if(print_enable) std::cout << "effective uid " << geteuid() << std::endl;
                   returned = syscall(FIRST_FUNC_SET_SEC, array[0], array[1], array[2], array[3], array[4]);
-                  if(returned != 0) return 0;
+                  if(returned != 0) return false;
 
                   if(print_enable) std::cout << "verify_first_function_error_test Passed for the " << i+1 << "time" << std::endl;
                   if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;
          }
-         return 1;
+         return true;
 }
 
 
@@ -381,22 +379,20 @@ bool verify_second_function_error_test() {
 
                   bool print_enable = false;
 
-                  std::array<int, 5> array = generate_neagtive_positive_5_array();
-
                   if(print_enable) std::cout << "----------------------------------------------------------------------" << std::endl;
-                  if(print_enable) std::cout << "Im setting " << array << " for the verify_second_function_error_test" << std::endl;
 
-                  long returned = syscall(SECOND_FUNC_GET_SEC, array[0], array[1], array[2], array[3], array[4]);                                // Trying to insert negative arguments
+                  // Try to insert negative clearances, expect -1 and errno == EINVAL
+                  std::array<int, 5> array = generate_neagtive_positive_5_array();
+                  if(print_enable) std::cout << "Im setting " << array << " for the verify_second_function_error_test" << std::endl;
+                  long returned = syscall(SECOND_FUNC_GET_SEC, array[0], array[1], array[2], array[3], array[4]);
                   if(print_enable) std::cout << "SysCall GET_SEC returned: " << returned << std::endl;
 
-                  if(returned != -1) return 0;
-                  if(errno != EINVAL) return 0;
+                  if((returned != -1) || (errno != EINVAL)) return false;
                   if(print_enable) std::cout << "Just verified case of negative values to GET_SEC, got expected result" << returned << std::endl;
-
-                  if(print_enable) std::cout << "verify_second_function_error_test Passed for the " << i+1 << "time" << std::endl;
+                  if(print_enable) std::cout << "verify_second_function_error_test Passed for the " << i+1 << " time" << std::endl;
                   if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;
          }
-         return 1;
+         return true;
 }
 
 
