@@ -620,11 +620,11 @@
             run_test("Simple check_sec test", verify_simple_check_sec_test);
             run_test("Non binary check_sec test", verify_non_binary_check_sec_test);
             run_test("Simple fork check_sec test", verify_simple_fork_check_sec_test);
+            run_test("Dynamic fork check_sec test", verify_dynamic_fork_check_sec_test);            
 
             run_test("First function error test", verify_first_function_error_test);
             run_test("Second function error test", verify_second_function_error_test);
-
-            
+           
 
             std::cout << "\nTest Summary:\n";                                                         // Summary
             if (failed_tests.empty()) {
