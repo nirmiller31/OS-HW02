@@ -351,6 +351,7 @@ bool verify_first_function_error_test() {
 
                   array = generate_neagtive_positive_5_array();
                   if(print_enable) std::cout << "Im setting " << array << " for the verify_first_function_error_test with no root privillages" << std::endl;
+                  returned = syscall(FIRST_FUNC_SET_SEC, array[0], array[1], array[2], array[3], array[4]);
                   if(returned != -1) return 0;
                   if(errno != EINVAL) return 0;
                   if(print_enable) std::cout << "Just verified case of negative values with no root prev. to SET_SEC, got expected result: " << returned << std::endl;
