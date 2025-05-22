@@ -459,40 +459,52 @@
 
     bool verify_dynamic_fork_check_sec_test() {
 
-    for(int i=0 ; i<SHORT_TEST_ITERATIONS ; i++) {
+        for(int i=0 ; i<SHORT_TEST_ITERATIONS ; i++) {
 
-            bool print_enable = false;
+                bool print_enable = false;
 
-            std::array<int, 5> result_array;
-            std::array<int, 5> child_result_array;
+                std::array<int, 5> result_array;
+                std::array<int, 5> child_result_array;
 
-            if(print_enable) std::cout << "----------------------------------------------------------------------" << std::endl;
+                if(print_enable) std::cout << "----------------------------------------------------------------------" << std::endl;
 
-            for(int j=0 ; j<MEDIUM_TEST_ITERATIONS ; j++){
+                for(int j=0 ; j<MEDIUM_TEST_ITERATIONS ; j++){
 
-                std::array<int, 5> array = generate_5_array();
-                if(print_enable) std::cout << "Im setting " << array << " for the verify_dynamic_fork_check_sec_test" << std::endl;
-                long returned = syscall(FIRST_FUNC_SET_SEC, array[0], array[1], array[2], array[3], array[4]);
-                if(print_enable) std::cout << "SysCall SET_SEC returned: " << returned << std::endl;
-                if(returned < 0) return false;
+                    std::array<int, 5> array = generate_5_array();
+                    if(print_enable) std::cout << "Im setting " << array << " for the verify_dynamic_fork_check_sec_test" << std::endl;
+                    long returned = syscall(FIRST_FUNC_SET_SEC, array[0], array[1], array[2], array[3], array[4]);
+                    if(print_enable) std::cout << "SysCall SET_SEC returned: " << returned << std::endl;
+                    if(returned < 0) return false;
 
-                std::array<int, 5> new_array = generate_5_array();        // To be updated in the child
-                
-                pid_t pid = fork();                 // Fork to verify we inherit the clearance field
+                    std::array<int, 5> new_array = generate_5_array();        // To be updated in the child
+                    
+                    int pipefd[2];
+                    if(pipe(pipefd) == -1) {return false;}
 
-                if(pid == 0) {                      // Child process, should inherit the clearance field
+                    pid_t pid = fork();                 // Fork to verify we inherit the clearance field
+
+                    if(pid == 0) {                      // Child process, should inherit the clearance field
+                        close(pipefd[0]); // pipe_shit
+
                         if(print_enable) std::cout << "Im setting " << new_array << " to the child in verify_dynamic_fork_check_sec_test" << std::endl;
                         returned = syscall(FIRST_FUNC_SET_SEC, new_array[0], new_array[1], new_array[2], new_array[3], new_array[4]);
+
+                        write(pipefd[1], "1", 1); // pipe_shit to annanuce the clearance field had been written
+                        close(pipefd[1]); // pipe_shit
                         pause();                   // Wait for the kill
-                }
-                if(pid > 0) {                       // Parent process
+                    }
+                    if(pid > 0) {                       // Parent process
+                        close(pipefd[1]); // pipe_shit
 
                         std::array<int, 5> array_of_ones = {1,1,1,1,1};
                         returned = syscall(FIRST_FUNC_SET_SEC, array_of_ones[0], array_of_ones[1], array_of_ones[2], array_of_ones[3], array_of_ones[4]);               // Let the caller have all the clerances, error handling checked seperatly
                         if(print_enable) std::cout << "SysCall SET_SEC returned: " << returned << std::endl;
                         if(returned < 0) return false;
 
-                        if(returned < 0) return false;
+                        char buffer; // pipe_shit
+                        read(pipefd[0], &buffer, 1); // Wait for child to finish the checkpoint
+                        close(pipefd[0]);
+
                         // Get the clearance using the pid and third sys_call
                         child_result_array[0] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_S_SWORD);
                         child_result_array[1] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_M_MIDNIGHT);
@@ -506,18 +518,18 @@
                         if(print_enable) std::cout << "I got " << child_result_array << " for the verify_dynamic_fork_check_sec_test" << std::endl;
                         if(child_result_array != new_array) {return false;}
                         if(print_enable) std::cout << "Just Verified " << pid << " 's clearance field" << std::endl;
-                }
-                if(pid < 0) {
-                        if(print_enable) std::cout << "Unexpected ERROR, verify_dynamic_fork_check_sec_test failed" << std::endl;
-                        return false;              // Fork failed
-                }
-        }
+                    }
+                    if(pid < 0) {
+                            if(print_enable) std::cout << "Unexpected ERROR, verify_dynamic_fork_check_sec_test failed" << std::endl;
+                            return false;              // Fork failed
+                    }
+            }
 
-        if(print_enable) std::cout << "verify_dynamic_fork_check_sec_test Passed for the " << i+1 << " time" << std::endl;
-        if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;
-                
-    }
-    return true;
+            if(print_enable) std::cout << "verify_dynamic_fork_check_sec_test Passed for the " << i+1 << " time" << std::endl;
+            if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;
+                    
+        }
+        return true;
     }
 
     bool verify_first_function_error_test() {
