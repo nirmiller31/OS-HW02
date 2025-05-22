@@ -40,7 +40,6 @@ std::ostream& operator<<(std::ostream& os, const std::array<T, N>& arr) {
 std::array<int, 5> generate_5_array() {                                                            // Generate binary array
 
          std::array<int, 5> result;
-
          for (int& num : result) {
              num = rand() % 2;
          }
@@ -50,7 +49,6 @@ std::array<int, 5> generate_5_array() {                                         
 std::array<int, 5> generate_non_binary_5_array() {                                                  // Generate array
 
          std::array<int, 5> result;
-
          for (int& num : result) {
              num = rand() / 7;
              if(num % 3 == 0) {num=0;}
@@ -65,7 +63,7 @@ std::array<int, 5> generate_neagtive_positive_5_array() {                       
 
          for(int i=0 ; i<5 ; i++){
                   result[i] = rand() / 7;
-                  if(result[i] % 3 == 0) {result[i]=0;}
+                  if(result[i] % 3 == 0 && i != negative_index) {result[i]=0;}
                   if(result[i] % 5 == 0 || i == negative_index) {result[i]*=(-1);}
          }
          return result;
@@ -90,6 +88,8 @@ void run_test(const std::string& name, TestFunc func) {                         
 
 bool verify_default_is_zero_test() {
 
+         bool print_enable = false;
+
          std::array<int, 5> zero_array = {0,0,0,0,0};
          std::array<int, 5> result_array;
          result_array[0] = syscall(SECOND_FUNC_GET_SEC, LETTER_S_SWORD);
@@ -97,6 +97,7 @@ bool verify_default_is_zero_test() {
          result_array[2] = syscall(SECOND_FUNC_GET_SEC, LETTER_C_CLAMP);
          result_array[3] = syscall(SECOND_FUNC_GET_SEC, LETTER_D_DUTY);
          result_array[4] = syscall(SECOND_FUNC_GET_SEC, LETTER_I_ISOLATE);
+         if(print_enable) std::cout << "I got " << result_array << " for the verify_default_is_zero_test" << std::endl;
          return (result_array == zero_array);
 
 }
@@ -159,11 +160,11 @@ bool verify_non_binary_setter_getter_test() {
 
                   if(print_enable) std::cout << "I got " << result_array << " for the verify_non_binary_setter_getter_test" << std::endl;
 
-                  array[0] = (result_array[0] > 0);
-                  array[1] = (result_array[1] > 0);
-                  array[2] = (result_array[2] > 0);
-                  array[3] = (result_array[3] > 0);
-                  array[4] = (result_array[4] > 0);
+                  result_array[0] = (result_array[0] > 0);
+                  result_array[1] = (result_array[1] > 0);
+                  result_array[2] = (result_array[2] > 0);
+                  result_array[3] = (result_array[3] > 0);
+                  result_array[4] = (result_array[4] > 0);
 
                   if(print_enable) std::cout << "I got " << array << " for the verify_non_binary_setter_getter_test" << std::endl;
 
@@ -342,7 +343,7 @@ bool verify_first_function_error_test() {
                   if (seteuid(1000) == -1) {return 0;}                                                                                          // Undo the root privillages
                   if(print_enable) std::cout << "effective uid " << geteuid() << std::endl;
 
-                  long returned = syscall(FIRST_FUNC_SET_SEC, array[0], array[1], array[2], array[3], array[4]);                                // Trying to insert valid arguments
+                  returned = syscall(FIRST_FUNC_SET_SEC, array[0], array[1], array[2], array[3], array[4]);                                     // Trying to insert valid arguments
                   if(print_enable) std::cout << "SysCall SET_SEC returned: " << returned << std::endl;
                   if(returned != -1) return 0;
                   if(errno != EPERM) return 0;
@@ -358,6 +359,7 @@ bool verify_first_function_error_test() {
                   array = generate_5_array();                                                                                                   // generate valid array
                   if(print_enable) std::cout << "Im setting " << array << " for the verify_first_function_error_test" << std::endl;             // Undo the root privillages
                   if(print_enable) std::cout << "effective uid " << geteuid() << std::endl;
+                  returned = syscall(FIRST_FUNC_SET_SEC, array[0], array[1], array[2], array[3], array[4]);
                   if(returned != 0) return 0;
 
                   if(print_enable) std::cout << "verify_first_function_error_test Passed for the " << i+1 << "time" << std::endl;
