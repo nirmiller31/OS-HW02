@@ -316,6 +316,11 @@ bool verify_deep_fork_setter_getter_test() {
 
 bool verify_first_function_error_test() {
 
+         if (seteuid(0) == -1) {                                                                                                                // Verify we run with root previllages
+                  std::cout << "Error test failed, Please run command with sudo: ./test" << std::endl;
+                  return 0;
+         }
+
          for(int i=0 ; i<SHORT_TEST_ITERATIONS ; i++) {
 
                   bool print_enable = true;
@@ -334,9 +339,29 @@ bool verify_first_function_error_test() {
 
                   array = generate_5_array();                                                                                                   // generate valid array
                   if(print_enable) std::cout << "Im setting " << array << " for the verify_first_function_error_test" << std::endl;
-
+                  if (seteuid(1000) == -1) {return 0;}                                                                                          // Undo the root privillages
                   if(print_enable) std::cout << "effective uid " << geteuid() << std::endl;
-                  if(print_enable) std::cout << "uid " << getuid() << std::endl;
+
+                  long returned = syscall(FIRST_FUNC_SET_SEC, array[0], array[1], array[2], array[3], array[4]);                                // Trying to insert valid arguments
+                  if(print_enable) std::cout << "SysCall SET_SEC returned: " << returned << std::endl;
+                  if(returned != -1) return 0;
+                  if(errno != EPERM) return 0;
+                  if(print_enable) std::cout << "Just verified lack of root previllages to SET_SEC, got expected result" << returned << std::endl;
+
+                  array = generate_neagtive_positive_5_array();
+                  if(print_enable) std::cout << "Im setting " << array << " for the verify_first_function_error_test with no root privillages" << std::endl;
+                  if(returned != -1) return 0;
+                  if(errno != EINVAL) return 0;
+                  if(print_enable) std::cout << "Just verified case of negative values with no root prev. to SET_SEC, got expected result" << returned << std::endl;
+
+                  if (seteuid(0) == -1) {return 0;}                                                                                             // Set root previllages back
+                  array = generate_5_array();                                                                                                   // generate valid array
+                  if(print_enable) std::cout << "Im setting " << array << " for the verify_first_function_error_test" << std::endl;             // Undo the root privillages
+                  if(print_enable) std::cout << "effective uid " << geteuid() << std::endl;
+                  if(returned != 0) return 0;
+
+                  if(print_enable) std::cout << "verify_first_function_error_test Passed for the " << i+1 << "time" << std::endl;
+                  if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;
          }
          return 1;
 }
