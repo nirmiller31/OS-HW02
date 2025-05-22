@@ -382,9 +382,16 @@ bool verify_second_function_error_test() {
                   if(print_enable) std::cout << "----------------------------------------------------------------------" << std::endl;
 
                   // Try to insert negative clearances, expect -1 and errno == EINVAL
-                  std::array<int, 5> array = generate_neagtive_positive_5_array();
-                  if(print_enable) std::cout << "Im setting " << array << " for the verify_second_function_error_test" << std::endl;
-                  long returned = syscall(SECOND_FUNC_GET_SEC, array[0], array[1], array[2], array[3], array[4]);
+                  std::array<char, 21> letters = {
+                           'a', 'b', 'e', 'f', 'g', 'h',
+                           'j', 'k', 'l', 'n', 'o', 'p',
+                           'q', 'r', 't', 'u', 'v', 'w',
+                           'x', 'y', 'z'
+                       };
+                  int letter_index = rand() % 21;
+                  char invalid_character = letters[letter_index];
+                  if(print_enable) std::cout << "Im setting letter: " << invalid_character << " for the verify_second_function_error_test" << std::endl;
+                  long returned = syscall(SECOND_FUNC_GET_SEC, invalid_character);
                   if(print_enable) std::cout << "SysCall GET_SEC returned: " << returned << std::endl;
 
                   if((returned != -1) || (errno != EINVAL)) return false;
