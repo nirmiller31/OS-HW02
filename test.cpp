@@ -359,13 +359,50 @@
         return true;
     }
 
+    bool verify_init_check_sec_test() {
+
+        for(int i=0 ; i<MEDIUM_TEST_ITERATIONS ; i++) {
+
+            bool print_enable = false;
+
+            std::array<int, 5> array_of_ones = {1,1,1,1,1};
+            std::array<int, 5> result_array;
+
+            if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;
+            if(print_enable) std::cout << "Im setting " << array_of_ones << " for the verify_init_check_sec_test" << std::endl;
+            
+            // Set the maximum clearance in order to access
+            long returned = syscall(FIRST_FUNC_SET_SEC, array_of_ones[0], array_of_ones[1], array_of_ones[2], array_of_ones[3], array_of_ones[4]);
+            if(print_enable) std::cout << "SysCall SET_SEC returned: " << returned << " 0 is GOOD!" << std::endl;
+
+            if(returned < 0) {return 0; }
+
+            pid_t pid = 1;
+
+            // Get the clearance of init using system call, we expect 0's
+            result_array[0] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_S_SWORD);
+            result_array[1] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_M_MIDNIGHT);
+            result_array[2] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_C_CLAMP);
+            result_array[3] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_D_DUTY);
+            result_array[4] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_I_ISOLATE);
+
+            if(print_enable) std::cout << "I got " << result_array << " for the verify_init_check_sec_test" << std::endl;
+
+            if(result_array != {0,0,0,0,0}) {return false;}
+
+            if(print_enable) std::cout << "verify_init_check_sec_test Passed for the " << i+1 << " time" << std::endl;
+            if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;        
+        }
+        return true;
+    }
+
     bool verify_non_binary_check_sec_test() {
 
         for(int i=0 ; i<MEDIUM_TEST_ITERATIONS ; i++) {
 
             bool print_enable = false;
 
-            std::array<int, 5> array = generate_non_binary_5_array();;
+            std::array<int, 5> array = generate_non_binary_5_array();
             std::array<int, 5> result_array;
 
             if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;
@@ -528,6 +565,66 @@
             }
             if(print_enable) std::cout << "verify_dynamic_fork_check_sec_test Passed for the " << i+1 << " time" << std::endl;
             if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;           
+        }
+        return true;
+    }
+
+    bool verify_simple_init_flip_sec_branch_test() {
+
+        for(int i=0 ; i<MEDIUM_TEST_ITERATIONS ; i++) {
+
+            bool print_enable = false;
+
+            std::array<int, 5> array_of_ones = {1,1,1,1,1};
+            std::array<int, 5> result_array;
+
+            if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;
+            if(print_enable) std::cout << "Im setting " << array_of_ones << " for the verify_simple_init_flip_sec_branch_test" << std::endl;
+            
+            // Set array of ones to have full access
+            long returned = syscall(FIRST_FUNC_SET_SEC, array_of_ones[0], array_of_ones[1], array_of_ones[2], array_of_ones[3], array_of_ones[4]);
+            if(print_enable) std::cout << "SysCall SET_SEC returned: " << returned << " 0 is GOOD!" << std::endl;
+
+            if(returned < 0) {return 0; }
+
+            int supposed_init_height = 5000;
+            // We expect to flip all inits from 0 to 1
+            if(print_enable) std::cout << "Im flipping the init's clearance from 0 to 1 for the verify_simple_init_flip_sec_branch_test" << std::endl;
+            result_array[0] = syscall(FOURTH_FUNC_FLIP_SEC_BRANCH, supposed_init_height, LETTER_S_SWORD);
+            result_array[1] = syscall(FOURTH_FUNC_FLIP_SEC_BRANCH, supposed_init_height, LETTER_M_MIDNIGHT);
+            result_array[2] = syscall(FOURTH_FUNC_FLIP_SEC_BRANCH, supposed_init_height, LETTER_C_CLAMP);
+            result_array[3] = syscall(FOURTH_FUNC_FLIP_SEC_BRANCH, supposed_init_height, LETTER_D_DUTY);
+            result_array[4] = syscall(FOURTH_FUNC_FLIP_SEC_BRANCH, supposed_init_height, LETTER_I_ISOLATE);
+
+            pid_t pid = 1;
+            // Get the clearance of init using system call, we expect 0's
+            result_array[0] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_S_SWORD);
+            result_array[1] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_M_MIDNIGHT);
+            result_array[2] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_C_CLAMP);
+            result_array[3] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_D_DUTY);
+            result_array[4] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_I_ISOLATE);
+            if(print_enable) std::cout << "I got " << result_array << " for the verify_simple_init_flip_sec_branch_test" << std::endl;
+
+            if(result_array != array_of_ones){ return false;}
+
+            if(print_enable) std::cout << "Im flipping the init's clearance from 1 to 0 for the verify_simple_init_flip_sec_branch_test" << std::endl;
+            result_array[0] = syscall(FOURTH_FUNC_FLIP_SEC_BRANCH, supposed_init_height, LETTER_S_SWORD);
+            result_array[1] = syscall(FOURTH_FUNC_FLIP_SEC_BRANCH, supposed_init_height, LETTER_M_MIDNIGHT);
+            result_array[2] = syscall(FOURTH_FUNC_FLIP_SEC_BRANCH, supposed_init_height, LETTER_C_CLAMP);
+            result_array[3] = syscall(FOURTH_FUNC_FLIP_SEC_BRANCH, supposed_init_height, LETTER_D_DUTY);
+            result_array[4] = syscall(FOURTH_FUNC_FLIP_SEC_BRANCH, supposed_init_height, LETTER_I_ISOLATE);
+
+            result_array[0] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_S_SWORD);
+            result_array[1] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_M_MIDNIGHT);
+            result_array[2] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_C_CLAMP);
+            result_array[3] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_D_DUTY);
+            result_array[4] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_I_ISOLATE);
+            if(print_enable) std::cout << "I got " << result_array << " for the verify_simple_init_flip_sec_branch_test" << std::endl;
+
+            if(result_array != {0,0,0,0,0}){ return false;}
+
+            if(print_enable) std::cout << "verify_simple_init_flip_sec_branch_test Passed for the " << i+1 << " time" << std::endl;
+            if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;        
         }
         return true;
     }
@@ -745,10 +842,12 @@
             run_test("Wide Fork Setter Getter test", verify_wide_fork_setter_getter_test);
             run_test("Deep Fork Setter Getter test", verify_deep_fork_setter_getter_test);
             run_test("Simple check_sec test", verify_simple_check_sec_test);
+            run_test("Init check_sec test", verify_init_check_sec_test);
             run_test("Non binary check_sec test", verify_non_binary_check_sec_test);
             run_test("Simple fork check_sec test", verify_simple_fork_check_sec_test);
             run_test("Dynamic fork check_sec test", verify_dynamic_fork_check_sec_test);            
-
+            run_test("Init flip flip_sec_branch test", verify_simple_init_flip_sec_branch_test);    
+            
             run_test("First function error handling test", verify_first_function_error_handling_test);
             run_test("Second function error handling test", verify_second_function_error_handling_test);
             run_test("Third function error handling test", verify_third_function_error_handling_test);
