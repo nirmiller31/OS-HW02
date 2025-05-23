@@ -694,7 +694,7 @@
 
         for(int i=0 ; i<SHORT_TEST_ITERATIONS ; i++) {
 
-            bool print_enable = false;
+            bool print_enable = true;
 
             std::vector<std::array<int, 5>> *data_vector =                  new std::vector<std::array<int, 5>>;
             std::vector<std::array<int, 5>> *expected_data_vector =         new std::vector<std::array<int, 5>>;
@@ -974,7 +974,8 @@
             run_test("Non binary check_sec test", verify_non_binary_check_sec_test);
             run_test("Simple fork check_sec test", verify_simple_fork_check_sec_test);
             run_test("Dynamic fork check_sec test", verify_dynamic_fork_check_sec_test);            
-            run_test("Init flip flip_sec_branch test", verify_simple_init_flip_sec_branch_test);    
+            run_test("Init flip flip_sec_branch test", verify_simple_init_flip_sec_branch_test); 
+            run_test("Big flip_sec_branch test", verify_flip_sec_branch_test);    
             
             run_test("First function error handling test", verify_first_function_error_handling_test);
             run_test("Second function error handling test", verify_second_function_error_handling_test);
