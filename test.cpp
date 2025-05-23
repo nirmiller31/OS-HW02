@@ -85,7 +85,7 @@
 
     bool verify_default_is_zero_test() {
 
-        bool print_enable = true;
+        bool print_enable = false;
 
         std::array<int, 5> zero_array = {0,0,0,0,0};
         std::array<int, 5> result_array;
@@ -98,7 +98,9 @@
             result_array[3] = syscall(SECOND_FUNC_GET_SEC, LETTER_D_DUTY);
             result_array[4] = syscall(SECOND_FUNC_GET_SEC, LETTER_I_ISOLATE);
             if(print_enable) std::cout << "I got " << result_array << " for the verify_default_is_zero_test" << std::endl;
-            if(result_array != zero_array) {return false;}
+            if(result_array != zero_array) {
+                std::cout << "Please run this test afyet reseting your VM, the course's test put 1 in init's clearance" << std::endl;
+                return false;}
         }
         return true;
     }
@@ -363,7 +365,7 @@
 
         for(int i=0 ; i<MEDIUM_TEST_ITERATIONS ; i++) {
 
-            bool print_enable = true;
+            bool print_enable = false;
 
             std::array<int, 5> array_of_ones = {1,1,1,1,1};
             std::array<int, 5> array_of_zeros = {0,0,0,0,0};
@@ -574,11 +576,12 @@
 
         for(int i=0 ; i<MEDIUM_TEST_ITERATIONS ; i++) {
 
-            bool print_enable = true;
+            bool print_enable = false;
 
             std::array<int, 5> array_of_ones = {1,1,1,1,1};
             std::array<int, 5> result_array;
             std::array<int, 5> init_array;
+            std::array<int, 5> inverted_init_array;
 
             if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;
             if(print_enable) std::cout << "Im setting " << array_of_ones << " for the verify_simple_init_flip_sec_branch_test" << std::endl;
@@ -597,6 +600,16 @@
             init_array[3] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_D_DUTY);
             init_array[4] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_I_ISOLATE);
 
+            if(print_enable) std::cout << "I got init array: " << init_array << " for the verify_init_check_sec_test" << std::endl;
+
+            inverted_init_array[0] = init_array[0] ^ 1;
+            inverted_init_array[1] = init_array[1] ^ 1;
+            inverted_init_array[2] = init_array[2] ^ 1;
+            inverted_init_array[3] = init_array[3] ^ 1;
+            inverted_init_array[4] = init_array[4] ^ 1;
+
+            if(print_enable) std::cout << "I got inverted init array: " << inverted_init_array << " for the verify_init_check_sec_test" << std::endl;
+
             int supposed_init_height = 5000;
             // We expect to flip all inits from 0 to 1
             if(print_enable) std::cout << "Im flipping the init's clearance from 0 to 1 for the verify_simple_init_flip_sec_branch_test" << std::endl;
@@ -614,13 +627,7 @@
             result_array[4] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_I_ISOLATE);
             if(print_enable) std::cout << "I got " << result_array << " for the verify_simple_init_flip_sec_branch_test" << std::endl;
 
-            if(result_array != init_array){ return false;}
-
-            init_array[0] ^= 1;
-            init_array[1] ^= 1;
-            init_array[2] ^= 1;
-            init_array[3] ^= 1;
-            init_array[4] ^= 1;
+            if(result_array != inverted_init_array){ return false;}
 
             if(print_enable) std::cout << "Im flipping the init's clearance from 1 to 0 for the verify_simple_init_flip_sec_branch_test" << std::endl;
             result_array[0] = syscall(FOURTH_FUNC_FLIP_SEC_BRANCH, supposed_init_height, LETTER_S_SWORD);
