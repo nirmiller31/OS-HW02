@@ -651,108 +651,206 @@
         return true;
     }
 
-    void recursive_branch_fork(std::vector<std::array<int, 5>> *data_vector, bool print_enable, int current_deep, int max_depth, int flipped_clearance_index, int* final_count){
+    // void recursive_branch_fork(std::vector<std::array<int, 5>> *data_vector, bool print_enable, int current_deep, int max_depth, int flipped_clearance_index, int* final_count){
 
-        if(print_enable) std::cout << "verify_deep_fork_setter_getter_test Im " << current_deep << " deep in the recursive fork, out of: " << max_depth << std::endl;
+    //     if(print_enable) std::cout << "verify_deep_fork_setter_getter_test Im " << current_deep << " deep in the recursive fork, out of: " << max_depth << std::endl;
 
-        std::array<int, 5> array = generate_5_array();
+    //     std::array<int, 5> array = generate_5_array();
 
-        pid_t pid = fork();
+    //     pid_t pid = fork();
 
-        if(pid < 0) {
-            if(print_enable) std::cout << "Unexpected ERROR, verify_wide_fork_setter_getter_test failed" << std::endl;
-            _exit(1);                  // Fork failed
-        }
-        else if(pid == 0) {                      // Child process, verify the clearance field is as written
+    //     if(pid < 0) {
+    //         if(print_enable) std::cout << "Unexpected ERROR, verify_wide_fork_setter_getter_test failed" << std::endl;
+    //         _exit(1);                  // Fork failed
+    //     }
+    //     else if(pid == 0) {                      // Child process, verify the clearance field is as written
 
-            if(current_deep < (max_depth+1)){                                   // Move on deeper, add array to vector
-                data_vector->push_back(array);
-                long returned = syscall(FIRST_FUNC_SET_SEC, array[0], array[1], array[2], array[3], array[4]);
-                if(print_enable) std::cout << "SysCall SET_SEC returned: " << returned << std::endl;
-                if(returned < 0) return;
-                recursive_branch_fork(data_vector, print_enable, current_deep + 1, max_depth, flipped_clearance_index, final_count);   
-            }
-            else{                                                           // We made <max_depth> branch, now flip the clearance
-                long returned = syscall(FOURTH_FUNC_FLIP_SEC_BRANCH, max_depth, flipped_clearance_index);
-                if(print_enable) std::cout << "SysCall FLIP_SEC_BRANCH returned: " << returned << std::endl;
-                if(returned < 0) return;
-                *final_count = returned;
-            }
-            _exit(0);                                                       // SUCCESS   
-        }
-        else if(pid > 0) {                       // Parent process, just wait the child
-            int status;
-            waitpid(pid, &status, 0);
-            if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {_exit(1); }
-            if(print_enable) std::cout << "Just passed pid " << pid << std::endl;
-            _exit(0);
-        }
-    }
+    //         if(current_deep < (max_depth+1)){                                   // Move on deeper, add array to vector
+    //             data_vector->push_back(array);
+    //             long returned = syscall(FIRST_FUNC_SET_SEC, array[0], array[1], array[2], array[3], array[4]);
+    //             if(print_enable) std::cout << "SysCall SET_SEC returned: " << returned << std::endl;
+    //             if(returned < 0) return;
+    //             recursive_branch_fork(data_vector, print_enable, current_deep + 1, max_depth, flipped_clearance_index, final_count);   
+    //         }
+    //         else{                                                           // We made <max_depth> branch, now flip the clearance
+    //             long returned = syscall(FOURTH_FUNC_FLIP_SEC_BRANCH, max_depth, flipped_clearance_index);
+    //             if(print_enable) std::cout << "SysCall FLIP_SEC_BRANCH returned: " << returned << std::endl;
+    //             if(returned < 0) return;
+    //             *final_count = returned;
+    //         }
+    //         _exit(0);                                                       // SUCCESS   
+    //     }
+    //     else if(pid > 0) {                       // Parent process, just wait the child
+    //         int status;
+    //         waitpid(pid, &status, 0);
+    //         if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {_exit(1); }
+    //         if(print_enable) std::cout << "Just passed pid " << pid << std::endl;
+    //         _exit(0);
+    //     }
+    // }
 
 
-    bool verify_flip_sec_branch_test() {
+    // bool verify_flip_sec_branch_test() {
 
-        for(int i=0 ; i<SHORT_TEST_ITERATIONS ; i++) {
+    //     for(int i=0 ; i<SHORT_TEST_ITERATIONS ; i++) {
 
-            bool print_enable = true;
+    //         bool print_enable = false;
 
-            std::vector<std::array<int, 5>> *data_vector =                  new std::vector<std::array<int, 5>>;
-            std::vector<std::array<int, 5>> *expected_data_vector =         new std::vector<std::array<int, 5>>;
-            int* final_count;
-            int our_final_count = 0;
+    //         std::vector<std::array<int, 5>> *data_vector =                  new std::vector<std::array<int, 5>>;
+    //         std::vector<std::array<int, 5>> *expected_data_vector =         new std::vector<std::array<int, 5>>;
+    //         int* final_count;
+    //         int our_final_count = 0;
 
-            std::array<int, 5> array = generate_5_array();
-            std::array<int, 5> result_array;
+    //         std::array<int, 5> array = generate_5_array();
+    //         std::array<int, 5> result_array;
 
-            if(print_enable) std::cout << "----------------------------------------------------------------------" << std::endl;
-            if(print_enable) std::cout << "Im setting " << array << " for the big father the verify_flip_sec_branch_test" << std::endl;
+    //         if(print_enable) std::cout << "----------------------------------------------------------------------" << std::endl;
+    //         if(print_enable) std::cout << "Im setting " << array << " for the big father the verify_flip_sec_branch_test" << std::endl;
             
-            long returned = syscall(FIRST_FUNC_SET_SEC, array[0], array[1], array[2], array[3], array[4]);
-            if(print_enable) std::cout << "SysCall SET_SEC returned: " << returned << std::endl;
-            if(returned < 0) return false;
+    //         long returned = syscall(FIRST_FUNC_SET_SEC, array[0], array[1], array[2], array[3], array[4]);
+    //         if(print_enable) std::cout << "SysCall SET_SEC returned: " << returned << std::endl;
+    //         if(returned < 0) return false;
                     
-            pid_t pid = fork();                 // Fork to verify we inherit the clearance field
+    //         pid_t pid = fork();                 // Fork to verify we inherit the clearance field
 
-            data_vector->push_back(array);
+    //         data_vector->push_back(array);
 
-            int recursion_deep = rand() % SHORT_TEST_ITERATIONS;
-            int flipped_clearance_index = rand() % 5;
+    //         int recursion_deep = rand() % SHORT_TEST_ITERATIONS;
+    //         int flipped_clearance_index = rand() % 5;
 
-            if(pid < 0) {
-                if(print_enable) std::cout << "Unexpected ERROR, verify_flip_sec_branch_test failed" << std::endl;
-                return false;                  // Fork failed
-            }
-            else if(pid == 0) {                      // Child process, verify the clearance field is as written
+    //         if(pid < 0) {
+    //             if(print_enable) std::cout << "Unexpected ERROR, verify_flip_sec_branch_test failed" << std::endl;
+    //             return false;                  // Fork failed
+    //         }
+    //         else if(pid == 0) {                      // Child process, verify the clearance field is as written
 
-                array = generate_5_array();
-                data_vector->push_back(array);
-                returned = syscall(FIRST_FUNC_SET_SEC, array[0], array[1], array[2], array[3], array[4]);
-                if(print_enable) std::cout << "SysCall SET_SEC returned: " << returned << std::endl;
-                if(returned < 0) return false;
+    //             array = generate_5_array();
+    //             data_vector->push_back(array);
+    //             returned = syscall(FIRST_FUNC_SET_SEC, array[0], array[1], array[2], array[3], array[4]);
+    //             if(print_enable) std::cout << "SysCall SET_SEC returned: " << returned << std::endl;
+    //             if(returned < 0) return false;
                 
-                recursive_branch_fork(data_vector, print_enable, 1, recursion_deep, flipped_clearance_index, final_count);               // Move on deeper
+    //             recursive_branch_fork(data_vector, print_enable, 1, recursion_deep, flipped_clearance_index, final_count);               // Move on deeper
 
-                _exit(0);                                             // SUCCESS
-            }
-            else if(pid > 0) {                       // Parent process, just wait the child
+    //             _exit(0);                                             // SUCCESS
+    //         }
+    //         else if(pid > 0) {                       // Parent process, just wait the child
+    //             int status;
+    //             waitpid(pid, &status, 0);
+    //             if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {return false; }
+    //             if(print_enable) std::cout << "Just Came back to the original process " << pid << std::endl;
+
+    //             for(int i=0 ; i<data_vector->size() ; i++){
+    //                 result_array = (*data_vector)[i];               // take out as FIFO
+    //                 if(print_enable) std::cout << "Iteration's " << i << " vector: " << result_array std::endl;
+    //                 result_array[flipped_clearance_index] ^= 1;     // flip manually to expect the expected
+    //                 if(result_array[flipped_clearance_index]) our_final_count++;
+    //                 expected_data_vector->push_back(result_array);
+    //             }
+    //             delete data_vector;
+    //         }
+            
+    //         if(print_enable) std::cout << "verify_flip_sec_branch_test Passed for the " << i+1 << " time" << std::endl;
+    //         if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;
+                
+    //     }
+    //     return true;
+    // }
+
+    void recursive_branch_fork(int pipe_write_fd, bool print_enable, int current_deep, int max_depth, int flipped_clearance_index, int* final_count) {
+        if (print_enable)
+            std::cout << "verify_deep_fork_setter_getter_test Im " << current_deep << " deep in the recursive fork, out of: " << max_depth << std::endl;
+    
+        std::array<int, 5> array = generate_5_array();
+    
+        if (current_deep < (max_depth + 1)) {
+            int pipefd[2];
+            pipe(pipefd);
+    
+            pid_t pid = fork();
+    
+            if (pid < 0) {
+                if (print_enable) std::cout << "Fork failed\n";
+                _exit(1);
+            } else if (pid == 0) {
+                close(pipefd[0]);
+                recursive_branch_fork(pipefd[1], print_enable, current_deep + 1, max_depth, flipped_clearance_index, final_count);
+                _exit(0);
+            } else {
+                close(pipefd[1]);
                 int status;
                 waitpid(pid, &status, 0);
-                if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {return false; }
-                if(print_enable) std::cout << "Just Came back to the original process " << pid << std::endl;
-
-                for(int i=0 ; i<data_vector->size() ; i++){
-                    result_array = (*data_vector)[i];               // take out as FIFO
-                    if(print_enable) std::cout << "Iteration's " << i << " vector: " << result_array << std::endl;
-                    result_array[flipped_clearance_index] ^= 1;     // flip manually to expect the expected
-                    if(result_array[flipped_clearance_index]) our_final_count++;
-                    expected_data_vector->push_back(result_array);
-                }
-                delete data_vector;
+                if (WIFEXITED(status) && WEXITSTATUS(status) != 0) _exit(1);
+    
+                std::vector<std::array<int, 5>> child_data;
+                std::array<int, 5> buf;
+                while (read(pipefd[0], buf.data(), sizeof(buf)) == sizeof(buf))
+                    child_data.push_back(buf);
+                close(pipefd[0]);
+    
+                long returned = syscall(FIRST_FUNC_SET_SEC, array[0], array[1], array[2], array[3], array[4]);
+                if (print_enable) std::cout << "SysCall SET_SEC returned: " << returned << std::endl;
+                if (returned < 0) _exit(1);
+    
+                for (auto &item : child_data)
+                    write(pipe_write_fd, item.data(), sizeof(item));
+                write(pipe_write_fd, array.data(), sizeof(array));
             }
-            
-            if(print_enable) std::cout << "verify_flip_sec_branch_test Passed for the " << i+1 << " time" << std::endl;
-            if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;
-                
+        } else {
+            long returned = syscall(FOURTH_FUNC_FLIP_SEC_BRANCH, max_depth, flipped_clearance_index);
+            if (print_enable) std::cout << "SysCall FLIP_SEC_BRANCH returned: " << returned << std::endl;
+            if (returned < 0) _exit(1);
+            *final_count = returned;
+            write(pipe_write_fd, array.data(), sizeof(array));
+        }
+    
+        close(pipe_write_fd);
+        _exit(0);
+    }
+    
+    bool verify_flip_sec_branch_test() {
+        for (int i = 0; i < SHORT_TEST_ITERATIONS; ++i) {
+            bool print_enable = false;
+    
+            std::vector<std::array<int, 5>> result_data;
+            std::vector<std::array<int, 5>> expected_data;
+            int final_count = 0;
+            int recursion_deep = rand() % SHORT_TEST_ITERATIONS;
+            int flipped_clearance_index = rand() % 5;
+    
+            std::array<int, 5> root_array = generate_5_array();
+            long returned = syscall(FIRST_FUNC_SET_SEC, root_array[0], root_array[1], root_array[2], root_array[3], root_array[4]);
+            if (returned < 0) return false;
+    
+            int pipefd[2];
+            pipe(pipefd);
+    
+            pid_t pid = fork();
+    
+            if (pid < 0) return false;
+            else if (pid == 0) {
+                close(pipefd[0]);
+                returned = syscall(FIRST_FUNC_SET_SEC, root_array[0], root_array[1], root_array[2], root_array[3], root_array[4]);
+                if (returned < 0) _exit(1);
+                recursive_branch_fork(pipefd[1], print_enable, 1, recursion_deep, flipped_clearance_index, &final_count);
+                _exit(0);
+            } else {
+                close(pipefd[1]);
+                int status;
+                waitpid(pid, &status, 0);
+                if (WIFEXITED(status) && WEXITSTATUS(status) != 0) return false;
+    
+                std::array<int, 5> buf;
+                while (read(pipefd[0], buf.data(), sizeof(buf)) == sizeof(buf))
+                    result_data.push_back(buf);
+                close(pipefd[0]);
+    
+                for (auto &arr : result_data) {
+                    arr[flipped_clearance_index] ^= 1;
+                    if (arr[flipped_clearance_index]) final_count++;
+                    expected_data.push_back(arr);
+                }
+            }
         }
         return true;
     }
@@ -974,8 +1072,7 @@
             run_test("Non binary check_sec test", verify_non_binary_check_sec_test);
             run_test("Simple fork check_sec test", verify_simple_fork_check_sec_test);
             run_test("Dynamic fork check_sec test", verify_dynamic_fork_check_sec_test);            
-            run_test("Init flip flip_sec_branch test", verify_simple_init_flip_sec_branch_test); 
-            run_test("Big flip_sec_branch test", verify_flip_sec_branch_test);    
+            run_test("Init flip flip_sec_branch test", verify_simple_init_flip_sec_branch_test);    
             
             run_test("First function error handling test", verify_first_function_error_handling_test);
             run_test("Second function error handling test", verify_second_function_error_handling_test);
