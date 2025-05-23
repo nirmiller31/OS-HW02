@@ -651,6 +651,112 @@
         return true;
     }
 
+    void recursive_branch_fork(std::vector<std::array<int, 5>> *data_vector, bool print_enable, int current_deep, int max_depth, int flipped_clearance_index, int* final_count){
+
+        if(print_enable) std::cout << "verify_deep_fork_setter_getter_test Im " << current_deep << " deep in the recursive fork, out of: " << max_depth << std::endl;
+
+        std::array<int, 5> array = generate_5_array();
+
+        pid_t pid = fork();
+
+        if(pid < 0) {
+            if(print_enable) std::cout << "Unexpected ERROR, verify_wide_fork_setter_getter_test failed" << std::endl;
+            _exit(1);                  // Fork failed
+        }
+        else if(pid == 0) {                      // Child process, verify the clearance field is as written
+
+            if(current_deep < (max_depth+1)){                                   // Move on deeper, add array to vector
+                data_vector->push_back(array);
+                long returned = syscall(FIRST_FUNC_SET_SEC, array[0], array[1], array[2], array[3], array[4]);
+                if(print_enable) std::cout << "SysCall SET_SEC returned: " << returned << std::endl;
+                if(returned < 0) return;
+                recursive_branch_fork(data_vector, print_enable, current_deep + 1, max_depth, flipped_clearance_index, final_count);   
+            }
+            else{                                                           // We made <max_depth> branch, now flip the clearance
+                long returned = syscall(FOURTH_FUNC_FLIP_SEC_BRANCH, max_depth, flipped_clearance_index);
+                if(print_enable) std::cout << "SysCall FLIP_SEC_BRANCH returned: " << returned << std::endl;
+                if(returned < 0) return;
+                *final_count = returned;
+            }
+            _exit(0);                                                       // SUCCESS   
+        }
+        else if(pid > 0) {                       // Parent process, just wait the child
+            int status;
+            waitpid(pid, &status, 0);
+            if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {_exit(1); }
+            if(print_enable) std::cout << "Just passed pid " << pid << std::endl;
+            _exit(0);
+        }
+    }
+
+
+    bool verify_flip_sec_branch_test() {
+
+        for(int i=0 ; i<SHORT_TEST_ITERATIONS ; i++) {
+
+            bool print_enable = false;
+
+            std::vector<std::array<int, 5>> *data_vector =                  new std::vector<std::array<int, 5>>;
+            std::vector<std::array<int, 5>> *expected_data_vector =         new std::vector<std::array<int, 5>>;
+            int* final_count;
+            int our_final_count = 0;
+
+            std::array<int, 5> array = generate_5_array();
+            std::array<int, 5> result_array;
+
+            if(print_enable) std::cout << "----------------------------------------------------------------------" << std::endl;
+            if(print_enable) std::cout << "Im setting " << array << " for the big father the verify_flip_sec_branch_test" << std::endl;
+            
+            long returned = syscall(FIRST_FUNC_SET_SEC, array[0], array[1], array[2], array[3], array[4]);
+            if(print_enable) std::cout << "SysCall SET_SEC returned: " << returned << std::endl;
+            if(returned < 0) return false;
+                    
+            pid_t pid = fork();                 // Fork to verify we inherit the clearance field
+
+            data_vector->push_back(array);
+
+            int recursion_deep = rand() % SHORT_TEST_ITERATIONS;
+            int flipped_clearance_index = rand() % 5;
+
+            if(pid < 0) {
+                if(print_enable) std::cout << "Unexpected ERROR, verify_flip_sec_branch_test failed" << std::endl;
+                return false;                  // Fork failed
+            }
+            else if(pid == 0) {                      // Child process, verify the clearance field is as written
+
+                array = generate_5_array();
+                data_vector->push_back(array);
+                returned = syscall(FIRST_FUNC_SET_SEC, array[0], array[1], array[2], array[3], array[4]);
+                if(print_enable) std::cout << "SysCall SET_SEC returned: " << returned << std::endl;
+                if(returned < 0) return false;
+                
+                recursive_branch_fork(data_vector, print_enable, 1, recursion_deep, flipped_clearance_index, final_count);               // Move on deeper
+
+                _exit(0);                                             // SUCCESS
+            }
+            else if(pid > 0) {                       // Parent process, just wait the child
+                int status;
+                waitpid(pid, &status, 0);
+                if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {return false; }
+                if(print_enable) std::cout << "Just Came back to the original process " << pid << std::endl;
+
+                for(int i=0 ; i<data_vector->size() ; i++){
+                    result_array = (*data_vector)[i];               // take out as FIFO
+                    if(print_enable) std::cout << "Iteration's " << i << " vector: " << result_array << std::endl;
+                    result_array[flipped_clearance_index] ^= 1;     // flip manually to expect the expected
+                    if(result_array[flipped_clearance_index]) our_final_count++;
+                    expected_data_vector->push_back(result_array);
+                }
+                delete data_vector;
+            }
+            
+            if(print_enable) std::cout << "verify_flip_sec_branch_test Passed for the " << i+1 << " time" << std::endl;
+            if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;
+                
+        }
+        return true;
+    }
+
     bool verify_first_function_error_handling_test() {
 
         if (seteuid(0) == -1) {                                                                                                                // Verify we run with root previllages
