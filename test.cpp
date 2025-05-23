@@ -85,7 +85,7 @@
 
     bool verify_default_is_zero_test() {
 
-        bool print_enable = false;
+        bool print_enable = true;
 
         std::array<int, 5> zero_array = {0,0,0,0,0};
         std::array<int, 5> result_array;
@@ -363,9 +363,10 @@
 
         for(int i=0 ; i<MEDIUM_TEST_ITERATIONS ; i++) {
 
-            bool print_enable = false;
+            bool print_enable = true;
 
             std::array<int, 5> array_of_ones = {1,1,1,1,1};
+            std::array<int, 5> array_of_zeros = {0,0,0,0,0};
             std::array<int, 5> result_array;
 
             if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;
@@ -388,7 +389,7 @@
 
             if(print_enable) std::cout << "I got " << result_array << " for the verify_init_check_sec_test" << std::endl;
 
-            if(result_array != {0,0,0,0,0}) {return false;}
+            if(result_array != array_of_zeros) {return false;}
 
             if(print_enable) std::cout << "verify_init_check_sec_test Passed for the " << i+1 << " time" << std::endl;
             if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;        
@@ -573,9 +574,10 @@
 
         for(int i=0 ; i<MEDIUM_TEST_ITERATIONS ; i++) {
 
-            bool print_enable = false;
+            bool print_enable = true;
 
             std::array<int, 5> array_of_ones = {1,1,1,1,1};
+            std::array<int, 5> array_of_zeros = {0,0,0,0,0};
             std::array<int, 5> result_array;
 
             if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;
@@ -621,7 +623,7 @@
             result_array[4] = syscall(THIRD_FUNC_CHECK_SEC, pid, LETTER_I_ISOLATE);
             if(print_enable) std::cout << "I got " << result_array << " for the verify_simple_init_flip_sec_branch_test" << std::endl;
 
-            if(result_array != {0,0,0,0,0}){ return false;}
+            if(result_array != array_of_zeros){ return false;}
 
             if(print_enable) std::cout << "verify_simple_init_flip_sec_branch_test Passed for the " << i+1 << " time" << std::endl;
             if(print_enable) std::cout << "-------------------------------------------------------------------" << std::endl;        
